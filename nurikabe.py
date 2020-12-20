@@ -1,15 +1,15 @@
 import copy
 N = 5
-global size, lacza, test
+global size, lacza
 size = 0
 lacza = 0
 rozwiazanie = []
 test = True
 #plansza = [[0] * N] * N
 plansza =[  [0, 1, 0, 1, 0], 
-            [0, 0, 0, 0, 0],
+            [0, '*', "*", 0, 0],
             [3, 0, 0, 0, 3], 
-            [0, 0, 0, 0, 0], 
+            [0, 0, 0, "*", 0], 
             [3, 0, 0, 0, 0]]
 
 stany = []
@@ -45,77 +45,23 @@ inne cyfry - początkowe wartości
 '''
 
 # sprawdza wszystkie założenia dla wody
-def CzyWoda(plansza):
-    ile = 0
-    for row in range(0, N):
-        for col in range(0, N):
-            if plansza[row][col] == '*':
-                ile += 1
-    if ile < 2:
-        return True
-    
-    for row in range(0, N):
-        for col in range(0, N):
 
-
-
-            if plansza[row][col] == "*":
-                sum = 0
-
-                if row < N - 1:
-                    if plansza[row+1][col] == "*":
-                        sum += 1
-                        if col > 0:
-                            if plansza[row+1][col-1] == "*":
-                                if plansza[row][col-1] == "*":
-                                    return False
-
-                if col < N-1:
-                    if plansza[row][col+1] == "*":
-                        sum += 1
-                        if row < N-1:
-                            if plansza[row+1][col+1] == "*":
-                                if plansza[row+1][col] == "*":  
-                                    return False    
-
-                if row > 0:
-                    if plansza[row-1][col] == "*":
-                        sum += 1
-                        if col < N-1:
-                            if plansza[row-1][col+1] == "*":
-                                if plansza[row][col+1] == "*":  
-                                    return False
-
-                if col >0:
-                    if plansza[row][col-1] == "*":
-                        sum += 1
-                        if row >0:
-                            if plansza[row-1][col-1] == "*":
-                                if plansza[row-1][col] == "*":  
-                                    return False                                    
-
-                if sum == 0 or sum == 4:
-                    return False
-    return True
-
-def CzyWoda2(board):
+def CheckWater(board):
+    global test
     row = 0
     col = 0
     test = True
-    while board[row][col] != "*":
-        while board[row][col] != "*":
-            if col < N:
-                col += 1
-            else:
-                col = 0
+    for row in range(0,N):
+        for col in range(0,N):
+            if board[row][col] == "*":
                 break
-        if row < N:
-            row += 1
-        else:
-            return True
+
+        if board[row][col] == "*":
+            break
+
 
     board2 = copy.deepcopy(board)
-    SearchWater(row,col,plansza2)
+    SearchWater(row,col,board2)
 
     if test == False:
         return False
@@ -126,7 +72,6 @@ def CzyWoda2(board):
     
     return True
             
-
 def SearchWater(row,col,board2):
     
     Check2x2(row,col)
@@ -153,7 +98,8 @@ def SearchWater(row,col,board2):
             SearchWater(row,col+1,board2)
 
 def Check2x2(row,col):
-    global N, test, plansza
+    global N, test
+
     if row < N - 1:
         if plansza[row+1][col] == "*":
             if col > 0:
@@ -269,7 +215,7 @@ def CzyMoznaWoda(planszax, row, col):
         return False
     planszay = copy.deepcopy(planszax)
     planszay[row][col] = "*"
-    return CzyWoda(planszay)
+    return CheckWater(planszay)
 
 def CzyMoznaLad(planszax, row, col):
     if planszax[row][col] != 0:
@@ -469,7 +415,7 @@ def rekurencyjnie(row, col, opcje):
 #print(sprawdzrozmiar(0,3,plansza))
 # GÓRA PRAWO DÓŁ LEWO
 
-rozwiazrekurencyjnie(plansza)
+print(CheckWater(plansza))
 
 
 print()
