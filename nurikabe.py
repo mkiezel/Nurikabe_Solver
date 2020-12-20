@@ -1,9 +1,10 @@
 import copy
 N = 5
-global size, lacza
+global size, lacza, test
 size = 0
 lacza = 0
 rozwiazanie = []
+test = True
 #plansza = [[0] * N] * N
 plansza =[  [0, 1, 0, 1, 0], 
             [0, 0, 0, 0, 0],
@@ -45,11 +46,6 @@ inne cyfry - początkowe wartości
 
 # sprawdza wszystkie założenia dla wody
 def CzyWoda(plansza):
-    # funckja sprawdzająca, czy nie ma nigdzie kwadratów wodnych 2x2 lub większych
-    # zliczając ilość rzek dookoła rzeki możemy sprawdzić czy nie ma w nim kwadratów
-    # wystraczy, że suma sąsiednich kwadratów będzie >0 i <4
-    # możemy z tego skorzystać, dzięki temu, że korzystamy z backtrackingu
-    # dodatkowo sprawdzając "kwadraty" sprawdzamy 2x2
     ile = 0
     for row in range(0, N):
         for col in range(0, N):
@@ -101,6 +97,92 @@ def CzyWoda(plansza):
                 if sum == 0 or sum == 4:
                     return False
     return True
+
+def CzyWoda2(board):
+    row = 0
+    col = 0
+    test = True
+    while board[row][col] != "*":
+        while board[row][col] != "*":
+            if col < N:
+                col += 1
+            else:
+                col = 0
+                break
+        if row < N:
+            row += 1
+        else:
+            return True
+
+    board2 = copy.deepcopy(board)
+    SearchWater(row,col,plansza2)
+
+    if test == False:
+        return False
+
+    for row in range(0, N):
+        if "*" in board2[row]:
+            return False
+    
+    return True
+            
+
+def SearchWater(row,col,board2):
+    
+    Check2x2(row,col)
+    
+    if row > 0:
+        if board2[row-1][col] == "*":
+            board2[row-1][col] = "x"
+
+            SearchWater(row-1,col,board2)
+
+    if row < N-1:
+        if board2[row+1][col] == "*":
+            board2[row+1][col] = "x"
+            SearchWater(row+1,col,board2)
+
+    if col > 0:
+        if board2[row][col-1] == "*":
+            board2[row][col-1] = "x"
+            SearchWater(row,col-1,board2)
+
+    if col < N-1:
+        if board2[row][col+1] == "*":
+            board2[row][col+1] = "x"
+            SearchWater(row,col+1,board2)
+
+def Check2x2(row,col):
+    global N, test, plansza
+    if row < N - 1:
+        if plansza[row+1][col] == "*":
+            if col > 0:
+                if plansza[row+1][col-1] == "*":
+                    if plansza[row][col-1] == "*":
+                        test = False
+
+    if col < N-1:
+        if plansza[row][col+1] == "*":
+            if row < N-1:
+                if plansza[row+1][col+1] == "*":
+                    if plansza[row+1][col] == "*":  
+                        test = False   
+
+    if row > 0:
+        if plansza[row-1][col] == "*":
+            if col < N-1:
+                if plansza[row-1][col+1] == "*":
+                    if plansza[row][col+1] == "*":  
+                        test = False
+
+    if col >0:
+        if plansza[row][col-1] == "*":
+            if row >0:
+                if plansza[row-1][col-1] == "*":
+                    if plansza[row-1][col] == "*":  
+                        test = False
+
+
 
 # rekurencyjnie idzie "w głąb" wyspy szuka innych cyfr i zlicza jej rozmiar
 def sprawdzrozmiar(row,col,plansza2):
