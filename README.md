@@ -1,6 +1,6 @@
 # Nurikabe puzzle solver
 ## General info
-In this repo i'll make script solving nurikabe, and tests in pytest. Then i want to make simple GUI for this project.
+In this repo i'll make script solving nurikabe, and tests in pytest. Then I want to make simple GUI for this project.
 
 ### Nurikabe rules
 There are 5 rules in classic nurikabe puzzle:
