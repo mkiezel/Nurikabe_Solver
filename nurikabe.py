@@ -1,5 +1,5 @@
 import copy
-N = 5
+N = 4
 global size, merge
 size = 0
 merge = 0
@@ -12,27 +12,13 @@ board =[  [0, 1, 0, 1, 0],
             [0, 0, 0, 0, 0], 
             [3, 0, 0, 0, 0]]
 
-states = []
-
-'''
-#plansza pokazuje odwiedzone rekurencyjnie wierzchołki
-# 0 - nieodwiedzony
-# 1 - odwiedzony
-# "X" - nietykalny
-plansza_odwiedzone = copy.deepcopy(plansza)
-
-for i in range(0,N):
-    for j in range(0,N):
-        if plansza_odwiedzone[i][j] != 0: 
-            plansza_odwiedzone[i][j] = "X"
 
 
-plansza =   [["*", 1 ,"*", 1 ,"*"],
-             ["*","*","*","*","*"],
-             [ 3 ,"#","#","*", 3 ],
-             ["*","*", "*" ,"*","#"],
-             [ 3 ,"#","#", '*' ,"#"]]
-'''
+board = [[1, 0, 0, 0],
+[0, 0, 0, 3],
+[2, 0, 0, 0],
+[0, 0, 0, 2]]
+
 
 '''
 [0, 1, 0, 1, 0],      [█,1,█,1,█],
@@ -44,6 +30,21 @@ plansza =   [["*", 1 ,"*", 1 ,"*"],
 * - river
 # - island
 '''
+# we create 2 dimension array to save our deepness levels
+deeps = []
+for i in range(0,N):
+    deeps.append([])
+    for j in range(0,N):
+        deeps[i].append(0)
+act_deep = 0
+
+
+options = []
+for i in range(0,N):
+    options.append([])
+    for j in range(0,N):
+        options[i].append([])
+
 
 
 def CheckWater(board):
@@ -70,11 +71,12 @@ def CheckWater(board):
             return False
     
     return True
-            
+         
 def SearchWater(row,col,board2):
     
     Check2x2(row,col)
-    
+    board2[row][col] = "x"
+
     if row > 0:
         if board2[row-1][col] == "*":
             board2[row-1][col] = "x"
@@ -125,7 +127,7 @@ def Check2x2(row,col):
                 if board[row-1][col-1] == "*":
                     if board[row-1][col] == "*":  
                         test = False
-
+  
 def CheckSize(row,col,board2):
     global size, merge
 
@@ -218,25 +220,116 @@ def CanBeIsland(board, row, col):
     board2[row][col] = "#"
     return CheckIsland(board2)
 
-def solve(board):
-    zeros = 0
-    for row in range(0, N):
-        for col in range(0, N):
-            if board[row][col] == 0:
-                if zeros == 0:
-                    start = [row,col,[]]
-                zeros += 1
-    if CanBeIsland(board,start[0],start[1]) == True:
-        start[2].append("#")
-    if CanBeWater(board,start[0],start[1]) == True:
-        start[2].append("*")
-    passes = []
-    passes.append(start)    
-    while zeros != -1:
-        zeros -= 1
+def GetOptions(board,row,col):
+    options2 = []
+    if CanBeIsland(board,row,col) == True:
+        options2.append("#")
+    if CanBeWater(board,row,col) == True:
+        options2.append("*")
+    return options2
 
-        print(zeros)
-        print(passes)
+
+def solve(board):
+    start = GetStart(board)
+    row = start[0]
+    col = start[1]
+    options[row][col] = start[2]
+    act_deep = 1
+    back_deep = 0
+    max_deep = 0
+    deeps[row][col] = act_deep
+    solve = False
+    while solve != True:
+        solve = CheckWholeIsland(board)
+
+        if options[row][col] != []:
+            board[row][col] = options[row][col][0]
+            #del options[row][col][0]
+        #we are adding options
+        if act_deep > max_deep:
+            max_deep = act_deep
+
+        if row > 0 and board[row-1][col] == 0 and GetOptions(board,row-1,col) !=[]:
+            options[row-1][col] = GetOptions(board,row-1,col)
+            act_deep += 1
+            deeps[row-1][col] = copy.deepcopy(act_deep)
+            row -= 1
+            back_deep = 0
+
+        elif col < N-1 and board[row][col+1] == 0 and GetOptions(board,row,col+1) !=[]:
+
+            options[row][col+1] = GetOptions(board,row,col+1)
+            act_deep += 1
+            deeps[row][col+1] = copy.deepcopy(act_deep)
+            col += 1
+            back_deep = 0
+
+        elif col > 0 and board[row][col-1] == 0 and GetOptions(board,row,col-1) !=[]:
+            options[row][col-1] = GetOptions(board,row,col-1)
+            act_deep += 1
+            deeps[row][col-1] = copy.deepcopy(act_deep)
+            col -= 1
+            back_deep = 0
+
+        elif row < N-1 and board[row+1][col] == 0 and GetOptions(board,row+1,col) !=[]:
+            options[row+1][col] = GetOptions(board,row+1,col)
+            act_deep += 1     
+            deeps[row+1][col] = copy.deepcopy(act_deep)     
+            row += 1   
+            back_deep = 0       
+
+
+        else: 
+            back_deep -= 1
+            for row2 in range(0,len(board)):
+                for col2 in range(0,len(board)):
+                    if deeps[row2][col2] == act_deep + back_deep:
+                        row = row2
+                        col = col2
+            if 0 - back_deep == max_deep:
+                print("trzeba zmienić")
+                back_row = 0
+                back_col = 0
+                back_max = 0
+                for row2 in range(0,len(board)):
+                    for col2 in range(0,len(board)):
+                        if deeps[row2][col2] > back_max and options[row2][col2] != []:
+                            back_max = copy.deepcopy(deeps[row2][col2])
+                            back_row = row2
+                            back_col = col2
+
+                for row2 in range(0,len(board)):
+                    for col2 in range(0,len(board)):
+                        if deeps[row2][col2] > back_max:
+                            deeps[row2][col2] = 0
+                            options[row2][col2] = []
+                            board[row2][col2] = 0
+                        elif deeps[row2][col2] == back_max:
+                            board[row2][col2] = options[row2][col2][0]
+                            del options[row2][col2][0]
+
+                row = back_row
+                col = back_col                     
+
+    
+        solve = CheckWholeIsland(board)
+
+
+        
+
+
+        for i in range(0,len(board)):
+            print(board[i])
+
+    
+
+
+
+
+
+
+
+
         
 def GetStart(board):
     start = 0
@@ -252,42 +345,8 @@ def GetStart(board):
     if CanBeWater(board,start[0],start[1]) == True:
         start[2].append("*")
     return start
-'''
-def UsunOsobnaWode(plansza):
-    for row in range(0, N):
-        for col in range(0, N):
-            if plansza[row][col] == "*":
-                a = False
 
-
-                if col > 0:
-                    if plansza[row][col-1] == "*":
-                        a= True
-                if col < N-1:
-                    if plansza[row][col+1] == "*":
-                        a= True
-                if row >0:
-                    if plansza[row-1][col] == "*":
-                        a= True
-                if row < N-1:
-                    if plansza[row+1][col] == "*":                  
-                        a= True
-                if a == False:
-                    plansza[row][col] = 0
-'''
-
-def SolveRecursively(board):
-    start = GetStart(board)
-    print(start)
-    recursion(start[0],start[1],start[2])
-
-
-def recursion(row, col, options):
-    global N, solution, board, states
-    states.append([row,col])
-    for i in range(0,len(board)):
-        print(board[i])
-    print (options)
+def IsSolution(board):
     a = 0
     for i in range (0,N):
         if 0 in board[i]:
@@ -295,126 +354,42 @@ def recursion(row, col, options):
     if a==0:
         solution.append(copy.deepcopy(board))
 
-    if options != []:
-        board[row][col] = options[0]
-        del options[0]
-        if row > 0:
-            if board[row-1][col] == 0:
-                options2 = []
-                if CanBeIsland(board,row-1,col) == True:
-                    options2.append("#")
-                if CanBeWater(board,row-1,col) == True:
-                    options2.append("*")
-                recursion(row-1,col,options2)
+def ClearBoard(deep_lvl):
+    global board
+    for row in range(0,N):
+        for col in range(0,N):
+            if deeps[row][col] > deep_lvl :
+                deeps[row][col] = 0
+                board[row][col] = 0
 
 
-        if col < N-1:
-            if board[row][col+1] == 0:
-                options2 = []
-                if CanBeIsland(board,row,col+1) == True:
-                    options2.append("#")
-                if CanBeWater(board,row,col+1) == True:
-                    options2.append("*")
-                recursion(row,col+1,options2)
-
-
-        if row < N-1:
-            if board[row+1][col] == 0:
-                options2 = []
-                if CanBeIsland(board,row+1,col) == True:
-                    options2.append("#")
-                if CanBeWater(board,row+1,col) == True:
-                    options2.append("*")
-                recursion(row+1,col,options2)
-
-
-        if col > 0:
-            if board[row][col-1] == 0:
-                options2 = []
-                if CanBeIsland(board,row,col-1) == True:
-                    options2.append("#")
-                if CanBeWater(board,row,col-1) == True:
-                    options2.append("*")
-                recursion(row,col-1,options2)
-
-
-    if options != []:
-        board[row][col] = options[0]
-        del options[0]
-        if row > 0:
-            if board[row-1][col] == 0:
-                options2 = []
-                if CanBeIsland(board,row-1,col) == True:
-                    options2.append("#")
-                if CanBeWater(board,row-1,col) == True:
-                    options2.append("*")
-                recursion(row-1,col,options2)
-
-
-        if col < N-1:
-            if board[row][col+1] == 0:
-                options2 = []
-                if CanBeIsland(board,row,col+1) == True:
-                    options2.append("#")
-                if CanBeWater(board,row,col+1) == True:
-                    options2.append("*")
-                recursion(row,col+1,options2)
-
-
-        if row < N-1:
-            if board[row+1][col] == 0:
-                options2 = []
-                if CanBeIsland(board,row+1,col) == True:
-                    options2.append("#")
-                if CanBeWater(board,row+1,col) == True:
-                    options2.append("*")
-                recursion(row+1,col,options2)
-
-
-        if col > 0:
-            if board[row][col-1] == 0:
-                options2 = []
-                if CanBeIsland(board,row,col-1) == True:
-                    options2.append("#")
-                if CanBeWater(board,row,col-1) == True:
-                    options2.append("*")
-                recursion(row,col-1,options2)
-
-    if col > 0:
-        if board[row][col-1] == 0:
-            board[row][col] = 0    
-
-    if col < N-1:            
-        if board[row][col+1]==0: 
-            board[row][col] = 0
-
-    if row > 0:
-        if board[row-1][col]==0 :
-            board[row][col] = 0
-
-    if row < N-1:
-        if board[row+1][col]==0:
-            board[row][col] = 0
-
-    '''
-    if plansza[row][col] == "#" and CheckWholeIsland(plansza) == False:
-        plansza[row][col] = 0
-
-    UsunOsobnaWode(plansza)
-    '''
-    return False
-
-
-#print(CheckSize(0,3,plansza))
 # GÓRA PRAWO DÓŁ LEWO
+solve(board)
 
-print(CheckWater(board))
 
-SolveRecursively(board)
+
+
+
+
+print("last deeps")
+for i in range(0,len(board)):
+    print(deeps[i])
+
+
+print("last options")
+for i in range(0,len(board)):
+    print(options[i])
+
 
 print()
 for i in range(0,len(board)):
     print(board[i])
 
 print(solution)
-print(states)
+
+
+for i in range(0,len(solution)):
+    if CheckWholeIsland(solution[i]) == True:
+        print("JEST!!!!!!")
+
+print(deeps)    
