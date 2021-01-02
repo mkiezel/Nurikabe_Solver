@@ -6,30 +6,7 @@ merge = 0
 solution = []
 test = True
 
-board =[  [0, 1, 0, 1, 0], 
-            [0, 0, 0, 0, 0],
-            [3, 0, 0, 0, 3], 
-            [0, 0, 0, 0, 0], 
-            [3, 0, 0, 0, 0]]
 
-
-
-board = [[1, 0, 0, 0],
-[0, 0, 0, 3],
-[2, 0, 0, 0],
-[0, 0, 0, 2]]
-
-
-'''
-[0, 1, 0, 1, 0],      [█,1,█,1,█],
-[0, 0, 0, 0, 0],      [█,█,█,█,█],
-[3, 0, 0, 0, 3],      [3,░,░,█,3],
-[0, 0, 0, 0, 0],      [█,█,█,█,░],
-[3, 0, 0, 0, 0],      [3,░,░,█,░],
-0 - unassigned field
-* - river
-# - island
-'''
 # we create 2 dimension array to save our deepness levels
 deeps = []
 for i in range(0,N):
@@ -353,6 +330,8 @@ def IsSolution(board):
             a += 1
     if a==0:
         solution.append(copy.deepcopy(board))
+        return True
+    return False
 
 def ClearBoard(deep_lvl):
     global board
@@ -362,34 +341,3 @@ def ClearBoard(deep_lvl):
                 deeps[row][col] = 0
                 board[row][col] = 0
 
-
-# GÓRA PRAWO DÓŁ LEWO
-solve(board)
-
-
-
-
-
-
-print("last deeps")
-for i in range(0,len(board)):
-    print(deeps[i])
-
-
-print("last options")
-for i in range(0,len(board)):
-    print(options[i])
-
-
-print()
-for i in range(0,len(board)):
-    print(board[i])
-
-print(solution)
-
-
-for i in range(0,len(solution)):
-    if CheckWholeIsland(solution[i]) == True:
-        print("JEST!!!!!!")
-
-print(deeps)    
