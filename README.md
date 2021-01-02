@@ -16,7 +16,7 @@ There are 5 rules in classic nurikabe puzzle:
 0 - unassigned field\
 "*" - river\
 "#" - island\
-##example:\
+example:\
 [0, 1, 0, 1, 0], ---> ["\*", 1 ,"\*", 1 ,"\*"]\
 [0, 0, 0, 0, 0], ---> ["\*","\*","\*","\*","\*"]\
 [3, 0, 0, 0, 3], ---> [ 3 ,"#","#","\*", 3 ]\
